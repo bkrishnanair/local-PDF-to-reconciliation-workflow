@@ -1,0 +1,3 @@
+po_number,vendor,equipment_id,equipment_name,quantity,rental_days,rental_start,rental_end,rate_basis,approved_daily_rate
+PO-1001,Example Equipment Rentals,EX-01,Excavator,1,3,2026-11-02,2026-11-04,daily,400.00
+PO-1002,Sample Lift Services,SL-01,Scissor Lift,1,2,2026-11-05,2026-11-06,daily,150.00
