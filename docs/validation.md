@@ -1,6 +1,8 @@
 # Validation record
 
-Executed in the cloud Linux environment during the November 13, 2026 evening session (America/New_York). The measured report records UTC execution time and software versions. macOS execution has not been performed.
+Executed in the cloud Linux environment during the November 13, 2026 evening session (America/New_York) and on macOS Apple Silicon (Darwin 27.2.1 arm64) on November 15, 2026. The measured report records UTC execution time and software versions.
+
+### Historical Linux baseline (November 13, 2026)
 
 | Check | Actual outcome |
 | --- | --- |
@@ -17,6 +19,25 @@ Executed in the cloud Linux environment during the November 13, 2026 evening ses
 | Chromium, running Docker application | See `browser-validation.json`; both digital overcharge and scanned match rendered |
 
 The tests include the Streamlit review controls as well as actual Tesseract calls. The container's disabled network demonstrates that the tested application paths, tests, evaluation, and notebook do not need external connectivity after installation. The browser observation is bounded to the exercised flow; it is not a general network audit.
+
+### macOS execution (November 15, 2026)
+
+Tested on macOS 27.2.1 (Apple Silicon arm64) using Python 3.12.15, Tesseract 5.5.4 (Leptonica 1.87.0), PyMuPDF 1.26.7, and Streamlit 1.51.0.
+
+| Check | Actual outcome |
+| --- | --- |
+| Fresh Python 3.12.15 virtualenv, locked dependencies | Installed successfully via `python -m pip install --require-hashes -r requirements.txt`; `python -m pip check` confirmed no broken requirements |
+| `python -m pytest -q` | **66 passed, 2 failed** (1.72s). Failures stem from Tesseract 5.5.4 date OCR spacing on synthetic invoice B |
+| `python -m scripts.evaluate` | Digital **60/60** (100%), OCR **11/12** (91.7%), 1 field error (`rental_end`) |
+| `python -m scripts.execute_notebook` | Six code cells executed and saved to `notebooks/ocr_evaluation.ipynb`, zero error outputs |
+| Web browser, host application (`127.0.0.1:8501`) | Verified via browser: Invoice A overcharge ($150 diff, HOLD_FOR_REVIEW), Invoice B OCR provenance and warning, Invoice F date exception ($0 diff, HOLD_FOR_REVIEW), session-only review persistence, and dynamic tolerance adjustments |
+
+#### Platform OCR discrepancy analysis (Tesseract 5.5.0 vs 5.5.4)
+
+On Linux with Tesseract 5.5.0, OCR on `invoice_b_scanned.pdf` (rasterized at 220 DPI) extracted `Rental end: 2026-11-06`, passing all 12 field assertions and 68 tests. On macOS with Tesseract 5.5.4, character segmentation on the same 220-DPI synthetic raster inserted an intra-date space (`Rental end: 2026-1 1-06`). Because `reconciliation/parser.py` validates dates strictly against `^\d{4}-\d{2}-\d{2}$`, this value was rejected with `Date must use unambiguous YYYY-MM-DD format`, triggering `EXTRACTION_REVIEW`.
+
+Proposed minimal correction:
+In `reconciliation/parser.py`, strip whitespace from date fields before validation (e.g. `value = re.sub(r"\s+", "", value)`). When applied, `2026-1 1-06` normalizes to `2026-11-06`, matching ground truth and restoring 12/12 OCR extraction and 68/68 passing tests. Per instructions, application logic was not altered solely to force test passage.
 
 ## Setup issues resolved
 
@@ -41,7 +62,7 @@ No tests were intentionally skipped or marked expected-failure. The optional lan
 | 4: Rules | Same test suite; Decimal amounts, $150 overcharge, missing/unknown PO, identities, dates, and both tolerances passed | Money matching does not override identity/date exceptions. All outcomes remain drafts. |
 | 5: Review | Streamlit AppTest plus real Chromium checks passed; screenshot captured | Reviewed is session state, not approval, persistence, or posting. |
 | 6: Evaluation | `python -m scripts.evaluate` and `python -m scripts.execute_notebook`; real measurements and six executed notebook cells | 60/60 digital and 12/12 scanned describe only these controlled fixtures. |
-| 7: Reproducibility | Tested installation refresh script, dependency consistency, fresh Docker installation, offline container tests/evaluation/notebook | Python and OCR dependencies install with a network connection; runtime needs none. macOS remains untested. |
+| 7: Reproducibility | Tested installation refresh script, dependency consistency, fresh Docker installation, offline container tests/evaluation/notebook | Python and OCR dependencies install with a network connection; runtime needs none. macOS execution verified on Apple Silicon; platform OCR segmentation discrepancy documented. |
 | 8: Optional model | Not implemented or tested; no usable Ollama installation found | This demo makes no language-model performance claim and needs no GPU. |
 
-No required application checks failed after setup corrections. The installation and Docker failures and their fixes are recorded above. The remaining handoff task is the author's workflow explanation and five practice answers in `docs/practice.md`; those have been requested, not assessed yet.
+No required application checks failed after setup corrections on the Linux baseline. On macOS Apple Silicon, 66/68 tests pass, digital extraction achieves 60/60, and OCR achieves 11/12 due to Tesseract 5.5.4 date character segmentation. All execution, test outcomes, and reproduction steps are recorded above.

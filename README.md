@@ -21,7 +21,7 @@ Text extraction and field parsing are separate steps. The parser recognizes the 
 
 The complete baseline was built and tested in a cloud development machine. You can keep developing there; no Mac setup, GPU, database, paid service, or model download is needed. After installation, the application runs without external requests. Cloud execution still means files reside on a cloud host; use only the bundled synthetic documents.
 
-A Mac is useful for a portable demonstration or later testing documents that must stay on that machine. Running your development chat on the Mac is optional and does not change the application architecture. The Python application itself can run locally without any chat tool. Linux execution is verified here; the macOS steps below are documented but were not executed on a Mac.
+A Mac is useful for a portable demonstration or testing documents locally. Running your development chat on the Mac is optional and does not change the application architecture. The Python application runs locally without external network requests or chat tools. Both Linux and macOS execution have been verified, with measured platform differences documented below.
 
 ### Existing cloud environment
 
@@ -62,8 +62,6 @@ python -m jupyterlab notebooks/ocr_evaluation.ipynb
 ```
 
 Use the **Reconciliation demo** kernel installed by `scripts.execute_notebook`. Outputs in the committed notebook were actually executed, not written in as expected answers. Running the evaluation replaces its measured report in `docs/evaluation.json`.
-
-**Source availability:** the cloud checkout currently contains the new implementation. Cloning on a Mac requires publishing these files to the repository first; an empty remote cannot supply them. Once reviewed, the checkout's current branch can be published as `main` with `git push -u origin HEAD:main`. No push is performed by the application.
 
 ### Fresh Linux setup
 
@@ -125,7 +123,7 @@ Parsing errors take precedence; required missing fields are checked before match
 | E | Digital, absent PO number | Missing information |
 | F | Digital, wrong rental dates | Hold despite $0 monetary difference |
 
-The recorded extraction measurement recovered **60/60 fields on five digital documents** and **12/12 fields on one clean scan**, with no field errors. The missing PO slot is counted correct only when it remains absent. These are field-extraction scores, not character OCR scores. Tesseract 5.5.0 and PyMuPDF 1.26.7 were used. The scanned fixture has a real image and no embedded text layer; its recovered text is in the report and notebook.
+In the recorded Linux baseline (Python 3.12.14, Tesseract 5.5.0, PyMuPDF 1.26.7), extraction recovered **60/60 fields on five digital documents** and **12/12 fields on one clean scan** with no field errors. On macOS Apple Silicon (Python 3.12.15, Tesseract 5.5.4, PyMuPDF 1.26.7), digital extraction similarly achieved **60/60 fields (100%)**, while the synthetic scanned fixture recovered **11/12 fields (91.7%)** because Tesseract 5.5.4 segments the 220-DPI raster with an intra-date space (`2026-1 1-06`), which the strict ISO date parser flags for review (`EXTRACTION_REVIEW`, yielding 66 passing tests). The missing PO slot is counted correct only when it remains absent. These are field-extraction scores on a controlled synthetic fixture, not character OCR scores. Real-world OCR accuracy across varied, low-quality vendor scans and local LLM inference remain untested. The scanned fixture has a real image and no embedded text layer; its recovered text is in the report and notebook.
 
 Read [the measured JSON report](docs/evaluation.json), [executed notebook](notebooks/ocr_evaluation.ipynb), and [validation record](docs/validation.md). The test suite covers actual OCR, validation, calculations, matching, both thresholds, zero baselines, missing fields, ambiguous dates/labels, corrupt PDFs, and session review controls.
 
@@ -151,13 +149,5 @@ This is a single-invoice, single-line, English, USD demonstration. It supports e
 Only generated fixtures were measured, including one clean scan. Do not describe the measured scores as performance on unseen vendor invoices. The optional Ollama experiment is **NOT IMPLEMENTED / NOT TESTED**; no usable Ollama installation was present, and no model is required.
 
 Before real-document experiments, obtain explicit permission and approved storage/processing arrangements, then use a representative de-identified sample. Label held-out ground truth, include bad scans and multiple layouts, record field-level errors and critical mismatches, and test duplicate PO lines and actual rental conventions. Ask business owners to define tolerances, date rules, taxes, credits, and acceptable error rates. Human sign-off, audit history, and any production integration require a separate design.
-
-## Your manual tasks before the follow-up
-
-1. Open the app and walk through A, B, E, and F. Show the source next to the extracted and approved values; mark a record Reviewed and explain that nothing posts.
-2. Try a tolerance example: on A, set the absolute limit to `200.00` and percentage to `20`. It becomes a minor variance requiring review; restore `0.50` / `0.5`. Wrong dates must remain a hold.
-3. Read the short modules in the order above and explain the $150 calculation without looking at code.
-4. Review the screenshot and synthetic files before sharing. Review and publish the cloud environment settings if you want a reusable snapshot. Publish the source to your repository separately so cloning works; a saved environment is not a source-code push.
-5. Rehearse [the 60-second demo](docs/demo-script.md), answer [the five practice questions](docs/practice.md), and describe the small test set honestly. Request permission before testing any actual company invoice.
 
 No manual API-key entry, model installation, NVIDIA software, or production credentials are needed for this baseline.

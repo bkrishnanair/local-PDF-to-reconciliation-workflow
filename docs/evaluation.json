@@ -1,7 +1,7 @@
 {
-  "executed_at_utc": "2026-11-14T03:37:59.833134+00:00",
-  "python": "3.12.14",
-  "tesseract": "5.5.0",
+  "executed_at_utc": "2026-11-15T23:52:49.405062+00:00",
+  "python": "3.12.15",
+  "tesseract": "5.5.4",
   "pymupdf": "1.26.7",
   "summary": [
     {
@@ -12,9 +12,9 @@
     },
     {
       "method": "ocr",
-      "correct": 12,
+      "correct": 11,
       "total": 12,
-      "accuracy": 1.0
+      "accuracy": 0.9166666666666666
     }
   ],
   "documents": [
@@ -28,8 +28,10 @@
     {
       "filename": "invoice_b_scanned.pdf",
       "method": "ocr",
-      "text": "SYNTHETIC DEMO \u2014 NOT A REAL INVOICE.\nFictional equipment rental | One line item | USD\nInvoice number: DEMO-B\n\nVendor: Sample Lift Services\n\nPO number: PO-1002\n\nEquipment ID: SL-01\n\nEquipment name: Scissor Lift\n\nQuantity: 1\n\nRental days: 2\n\nRental start: 2026-11-05\n\nRental end: 2026-11-06\n\nRate basis: daily\n\nDaily rate: 150.00\n\nLine total: 300.00\n\nRental dates are inclusive. No tax, fees, or customer billing in this demo.\nSYNTHETIC DEMO \u2014 NOT A REAL INVOICE.\n",
-      "errors": [],
+      "text": "SYNTHETIC DEMO \u2014 NOT A REAL INVOICE.\nFictional equipment rental | One line item | USD\nInvoice number: DEMO-B\n\nVendor: Sample Lift Services\n\nPO number: PO-1002\n\nEquipment ID: SL-01\n\nEquipment name: Scissor Lift\n\nQuantity: 1\n\nRental days: 2\n\nRental start: 2026-11-05\n\nRental end: 2026-1 1-06\n\nRate basis: daily\n\nDaily rate: 150.00\n\nLine total: 300.00\n\nRental dates are inclusive. No tax, fees, or customer billing in this demo.\nSYNTHETIC DEMO \u2014 NOT A REAL INVOICE.\n",
+      "errors": [
+        "rental_end: Date must use unambiguous YYYY-MM-DD format"
+      ],
       "warnings": [
         "Page 1: OCR text must be checked against the image; table layout is not guaranteed."
       ]
@@ -229,8 +231,8 @@
       "method": "ocr",
       "field": "rental_end",
       "expected": "2026-11-06",
-      "actual": "2026-11-06",
-      "correct": true
+      "actual": null,
+      "correct": false
     },
     {
       "filename": "invoice_b_scanned.pdf",
